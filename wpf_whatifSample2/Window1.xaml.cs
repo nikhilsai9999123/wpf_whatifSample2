@@ -127,15 +127,25 @@ namespace wpf_whatifSample2
             {
                 case MessageBoxResult.Yes:
 
-                    Resource_text.Clear();
-
-                    Template_text.Clear();
-
-                    Parameter_text.Clear();
-
-                    Validate_btn.IsEnabled = true;
+                    Validate_btn.IsEnabled = false;
 
                     Deploy_btn.IsEnabled = false;
+
+                    Back_btn.IsEnabled = false;
+
+                    Resource_text.IsEnabled = false;
+
+                    Tmp_browse_btn.IsEnabled = false;
+
+                    Para_browse_btn.IsEnabled = false;
+
+                    Template_text.IsEnabled = false;
+
+                    Parameter_text.IsEnabled = false;
+
+                    Dep_name_text.IsEnabled = false;
+
+                    drop.IsEnabled = false;
 
                     dataGrid1.Visibility = Visibility.Collapsed;
 
@@ -195,7 +205,9 @@ namespace wpf_whatifSample2
 
                     var print = json.ToString();
 
-                    MessageBox.Show(print);
+                    string msg = "Sucessfully deployed your resource in cloud!!";
+                    
+                    MessageBox.Show("Exception Message", msg, MessageBoxButton.OK,MessageBoxImage.Information);
 
                     //var con = new StringContent(class_name1.j_son, Encoding.UTF8, "application/json");
 
@@ -204,7 +216,7 @@ namespace wpf_whatifSample2
                     //responsebody = await response.Content.ReadAsStringAsync();
 
                     //var body = responsebody.ToString();
-                    string msg = "Sucessfully deployed your resource in cloud!!";
+                   
 
                     loader.Visibility = Visibility.Collapsed;
 
@@ -220,9 +232,10 @@ namespace wpf_whatifSample2
 
                     MainWindow.Tnt_txt.Clear();
 
-                    drop.SelectedIndex = -1;
+                    drop.IsEnabled = true;
+                    // drop.SelectedIndex = -1;
 
-                    this.Hide();
+                    this.Close();
 
                     MainWindow.Show();
 
@@ -237,7 +250,7 @@ namespace wpf_whatifSample2
                     break;
             }
         }
-        HttpClient client = new HttpClient();
+     //   HttpClient client = new HttpClient();
 
         public string j_son, con;
 
@@ -346,17 +359,18 @@ namespace wpf_whatifSample2
                     //dynamic json = JsonConvert.DeserializeObject(responsebody);
 
                     //int coun = json2.properties.changes.Length;
-                    
+
                     class_name1.rsc_grp = Resource_text.Text;
-                    class_name1.dep_name = Dep_name_text.Text+guid;
+                    class_name1.dep_name = Dep_name_text.Text + guid;
                     class_name1.dep_mode = drop.SelectedItem.ToString();
 
                     ClientSecretCredential clientSecretCredential = new ClientSecretCredential(
+
                clientId: class_name1.cli_id,
 
                tenantId: class_name1.Ten_id,
-               
-               clientSecret: class_name1.cli_sect) ;
+
+               clientSecret: class_name1.cli_sect);
 
                     // AccessToken accessToken = clientSecretCredential.GetTokenAsync(new TokenRequestContext(new[] { "https://management.azure.com/.default" })).Result;
                     //Console.WriteLine(accessToken);
@@ -370,13 +384,13 @@ namespace wpf_whatifSample2
                     string subscriptionId = class_name1.sub_id;
 
                     string resourceGroupName = class_name1.rsc_grp;
-                    
+
                     string scope = $"/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}";
-                    
+
                     string deploymentName = class_name1.dep_name;
 
                     ResourceIdentifier armDeploymentResourceId = ArmDeploymentResource.CreateResourceIdentifier(scope, deploymentName);
-                    
+
                     ArmDeploymentResource armDeployment = client.GetArmDeploymentResource(armDeploymentResourceId);
 
                     ArmDeploymentWhatIfContent content;
@@ -388,15 +402,15 @@ namespace wpf_whatifSample2
                     JObject parameters = (JObject)template["parameters"];
 
                     string t1 = class_name1.str2;
-                    
-                    class_name1.t2= parameters.ToString() ;
+
+                    class_name1.t2 = parameters.ToString();
                     // open the template file as a FileStream
 
                     // assign the content variable inside the using block
 
                     string deploymentModeString = drop.SelectionBoxItem.ToString();
 
-                      ArmDeploymentMode deploymentMode = (ArmDeploymentMode)Enum.Parse(typeof(ArmDeploymentMode), deploymentModeString);
+                    ArmDeploymentMode deploymentMode = (ArmDeploymentMode)Enum.Parse(typeof(ArmDeploymentMode), deploymentModeString);
 
                     content = new ArmDeploymentWhatIfContent(new ArmDeploymentWhatIfProperties(deploymentMode)
                     {
@@ -405,9 +419,9 @@ namespace wpf_whatifSample2
                         // use the FromStream method to create a BinaryData object from the FileStream
                         Template = BinaryData.FromString(class_name1.str2),
 
-                            Parameters = BinaryData.FromString(class_name1.t2)
-                        });
-                    
+                        Parameters = BinaryData.FromString(class_name1.t2)
+                    });
+
                     // use the content variable outside the using block
                     ArmOperation<WhatIfOperationResult> lro = await armDeployment.WhatIfAsync(WaitUntil.Completed, content);
 
@@ -416,118 +430,136 @@ namespace wpf_whatifSample2
                     string Jsonresult = response.Content.ToString();
                     
                     WhatifApiResult json2 = JsonConvert.DeserializeObject<WhatifApiResult>(Jsonresult);
-                    
+
                     dynamic json = JsonConvert.DeserializeObject(Jsonresult);
-                    
-                    int count = json2.properties.changes.Length;
 
-                     //content2 = new ArmDeploymentContent(new ArmDeploymentProperties(ArmDeploymentMode.Incremental)
-                     //   {
-                     //    // use the FromStream method to create a BinaryData object from the FileStream
-                     //    Template = BinaryData.FromString(class_name1.str2),
-                     //    Parameters = BinaryData.FromString(class_name1.str3)
-                     //});
-                    
-                    //  ArmOperation<WhatIfOperationResult> lro2 = await armDeployment.UpdateAsync(WaitUntil.Completed, content2);
-                 //   var lro2 = await armDeployment.UpdateAsync(WaitUntil.Completed, content2);                                  
-
-                    dt = new DataTable("responsedata");
-
-                    DataColumn dc1 = new DataColumn("Slno", typeof(int));
-
-                    DataColumn dc2 = new DataColumn("ChangeType", typeof(string));
-
-                    DataColumn dc3 = new DataColumn("ResourceName", typeof(string));
-
-                    DataColumn dc4 = new DataColumn("ResourceType", typeof(string));
-
-                    DataColumn dc5 = new DataColumn("Location", typeof(string));
-
-                    dt.Columns.Add(dc1);
-
-                    dt.Columns.Add(dc2);
-
-                    dt.Columns.Add(dc3);
-
-                    dt.Columns.Add(dc4);
-
-                    dt.Columns.Add(dc5);
-
-                    string del = "Delete", type2, type3, type4;
-
-                    for (int i = 0; i < count; i++)
+                    if (json.status=="Failed")
                     {
-                        string type1 = json2.properties.changes[i].changeType;
-                        if (type1 == del)
-                        {
-                            type2 = json2.properties.changes[i].before.name; ;
-                            type3 = json2.properties.changes[i].before.type;
-                            type4 = json2.properties.changes[i].before.location;
-                        }
-                        else
-                        {
-                            type2 = json2.properties.changes[i].after.name;
-                            type3 = json2.properties.changes[i].after.type;
-                            type4 = json2.properties.changes[i].after.location;
-                        }
-                        dataGrid1.Visibility = Visibility.Visible;
+                        string str = json.error.message;
 
-                        row = dt.NewRow();
+                        loader.Visibility = Visibility.Collapsed;
 
-                        row[0] = i + 1;
-                        row[1] = type1;
-                        row[2] = type2;
-                        row[3] = type3;
-                        row[4] = type4;
-                        dt.Rows.Add(row);
+                        MessageBox.Show(str, "Exception Message", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                        string button = MessageBoxButton.OK.ToString();
+                        if (button == "OK")
+                        {
+                            this.Close();
+                        }
                     }
-                    // dataGrid1.Items.Clear();
-                    dataGrid1.ItemsSource = dt.DefaultView;
+                    
+                    else
+                    {
+                        int count = json2.properties.changes.Length;
 
-                    // myPopupText.Visibility = Visibility.Collapsed;
-                    loader.Visibility = Visibility.Collapsed;
+                        //content2 = new ArmDeploymentContent(new ArmDeploymentProperties(ArmDeploymentMode.Incremental)
+                        //   {
+                        //    // use the FromStream method to create a BinaryData object from the FileStream
+                        //    Template = BinaryData.FromString(class_name1.str2),
+                        //    Parameters = BinaryData.FromString(class_name1.str3)
+                        //});
 
-                    Validate_btn.IsEnabled = false;
+                        //  ArmOperation<WhatIfOperationResult> lro2 = await armDeployment.UpdateAsync(WaitUntil.Completed, content2);
+                        //   var lro2 = await armDeployment.UpdateAsync(WaitUntil.Completed, content2);                                  
 
-                    Deploy_btn.IsEnabled = true;
+                        dt = new DataTable("responsedata");
 
-                    Back_btn.IsEnabled = true;
+                        DataColumn dc1 = new DataColumn("Slno", typeof(int));
 
-                    Resource_text.IsEnabled = true;
+                        DataColumn dc2 = new DataColumn("ChangeType", typeof(string));
 
-                    Tmp_browse_btn.IsEnabled = true;
+                        DataColumn dc3 = new DataColumn("ResourceName", typeof(string));
 
-                    Para_browse_btn.IsEnabled = true;
+                        DataColumn dc4 = new DataColumn("ResourceType", typeof(string));
 
-                    Template_text.IsEnabled = true;
+                        DataColumn dc5 = new DataColumn("Location", typeof(string));
 
-                    Parameter_text.IsEnabled = true;
+                        dt.Columns.Add(dc1);
 
-                    Dep_name_text.IsEnabled = true;
+                        dt.Columns.Add(dc2);
 
-                    drop.IsEnabled = true;
+                        dt.Columns.Add(dc3);
 
+                        dt.Columns.Add(dc4);
+
+                        dt.Columns.Add(dc5);
+
+                        string del = "Delete", type2, type3, type4;
+
+                        for (int i = 0; i < count; i++)
+                        {
+                            string type1 = json2.properties.changes[i].changeType;
+                            if (type1 == del)
+                            {
+                                type2 = json2.properties.changes[i].before.name; ;
+                                type3 = json2.properties.changes[i].before.type;
+                                type4 = json2.properties.changes[i].before.location;
+                            }
+                            else
+                            {
+                                type2 = json2.properties.changes[i].after.name;
+                                type3 = json2.properties.changes[i].after.type;
+                                type4 = json2.properties.changes[i].after.location;
+                            }
+                            dataGrid1.Visibility = Visibility.Visible;
+
+                            row = dt.NewRow();
+
+                            row[0] = i + 1;
+                            row[1] = type1;
+                            row[2] = type2;
+                            row[3] = type3;
+                            row[4] = type4;
+                            dt.Rows.Add(row);
+                        }
+                        // dataGrid1.Items.Clear();
+                        dataGrid1.ItemsSource = dt.DefaultView;
+
+                        // myPopupText.Visibility = Visibility.Collapsed;
+                        loader.Visibility = Visibility.Collapsed;
+
+                        Validate_btn.IsEnabled = false;
+
+                        Deploy_btn.IsEnabled = true;
+
+                        Back_btn.IsEnabled = true;
+
+                        Resource_text.IsEnabled = true;
+
+                        Tmp_browse_btn.IsEnabled = true;
+
+                        Para_browse_btn.IsEnabled = true;
+
+                        Template_text.IsEnabled = true;
+
+                        Parameter_text.IsEnabled = true;
+
+                        Dep_name_text.IsEnabled = true;
+
+                        drop.IsEnabled = true;
+
+                    }
                 }
                 catch (Exception ex)
                 {
-                   
+
                     //loader.Visibility = Visibility.Collapsed;
 
                     //var body = responsebody.ToString();
 
                     loader.Visibility = Visibility.Collapsed;
 
-                     string msg = ex.Message.ToString();
+                    string msg = ex.Message.ToString();
 
-                    MessageBox.Show(ex.Message.ToString(), "Exception Message", MessageBoxButton.OK, MessageBoxImage.Error) ;
+                    MessageBox.Show(ex.Message.ToString(), "Exception Message", MessageBoxButton.OK, MessageBoxImage.Error);
 
-                    string value = MessageBoxButton.OK.ToString(); 
+                    string value = MessageBoxButton.OK.ToString();
 
-                    if (value=="OK")
+                    if (value == "OK")
                     {
                         this.Close();
 
-                       // MainWindow.Show();
+                        // MainWindow.Show();
                     }
                     //this.Close();
 
@@ -554,7 +586,7 @@ namespace wpf_whatifSample2
                     //            loader.Visibility = Visibility.Collapsed;
 
                     //            MainWindow.Show();
-                          }
+                }
                 }
         }
         private void txtName_TextChanged(object sender, TextChangedEventArgs e)
@@ -575,7 +607,6 @@ namespace wpf_whatifSample2
             dataGrid1.Visibility = Visibility.Collapsed;
 
         }
-
         private void Back_button(object sender, RoutedEventArgs e)
         {
             this.Hide();
